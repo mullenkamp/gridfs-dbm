@@ -5,10 +5,7 @@ Created on Thu Jan  5 11:04:13 2023
 
 @author: mike
 """
-import os
 import io
-from hashlib import blake2b, blake2s
-from time import time
 import gridfs
 
 ############################################

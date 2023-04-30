@@ -4,18 +4,14 @@
 
 """
 import io
-import mmap
-import pathlib
-import inspect
 from collections.abc import Mapping, MutableMapping
 from typing import Any, Generic, Iterator, Union, List
 import pymongo
 import gridfs
 import concurrent.futures
-import multiprocessing as mp
 
-import utils
-# from . import utils
+# import utils
+from . import utils
 
 
 
@@ -27,11 +23,11 @@ class MongoDBM(MutableMapping):
     """
 
     """
-    def __init__(self, host: str='localhost', port: int=27017, database: str='db', flag: str = 'r', ttl: int=None):
+    def __init__(self, host: str='localhost', port: int=27017, database: str='db', flag: str = 'r', ttl: int=None, **kwargs):
         """
 
         """
-        self._db = pymongo.MongoClient(host=host, port=port)[database]
+        self._db = pymongo.MongoClient(host=host, port=port, **kwargs)[database]
 
         if flag == "r":  # Open existing database for reading only (default)
             write = False
@@ -208,7 +204,7 @@ class MongoDBM(MutableMapping):
 
 
 def open(
-    host: str='localhost', port: int=27017, database: str='db', flag: str = 'r', ttl: int=None):
+    host: str='localhost', port: int=27017, database: str='db', flag: str = 'r', ttl: int=None, **kwargs):
     """
     Open a MongoDB connection for writing and/or reading in a python dbm API style (MutableMapping). The MongoDB GridFS spec is used for storing objects. All keys must be strings and values must be either bytes or file-like objects.
 
@@ -228,6 +224,9 @@ def open(
 
     ttl : int or None
         Give the database a Time To Live (ttl) lifetime in seconds. All objects will persist in the database for this length. The default None will not assign a ttl. The ttl will only be changed in the collections if the flag parameter is set to anything but "r". Be careful to be consistant with the ttl as it will get overwritten if it is set to something different than the time before.
+
+    kwargs
+        Any kwargs that can be passed to the MongoClient (see https://pymongo.readthedocs.io/en/stable/api/pymongo/mongo_client.html#pymongo.mongo_client.MongoClient).
 
     Returns
     -------
@@ -252,4 +251,4 @@ def open(
     +---------+-------------------------------------------+
     """
 
-    return MongoDBM(host, port, database, flag, ttl)
+    return MongoDBM(host, port, database, flag, ttl, **kwargs)
