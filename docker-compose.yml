@@ -1,0 +1,8 @@
+version: '3'
+
+services:
+  db:
+    image: mongo:5
+    command: --wiredTigerJournalCompressor zstd --wiredTigerCollectionBlockCompressor zstd --wiredTigerCacheSizeGB 1.5
+    ports:
+      - "27017:27017"

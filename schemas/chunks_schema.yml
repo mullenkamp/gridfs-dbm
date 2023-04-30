@@ -1,0 +1,11 @@
+title: fs.chunks
+# required: [files_id, n, data]
+properties:
+  files_id:
+    bsonType: objectId
+  n:
+    bsonType: int
+  data:
+    bsonType: binData
+  uploadDate:
+    bsonType: date

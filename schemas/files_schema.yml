@@ -1,0 +1,11 @@
+title: fs.files
+# required: [filename, chunkSize, length, uploadDate]
+properties:
+  filename:
+    bsonType: string
+  chunkSize:
+    bsonType: int
+  length:
+    bsonType: long
+  uploadDate:
+    bsonType: date
