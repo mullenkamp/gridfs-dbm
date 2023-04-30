@@ -23,7 +23,7 @@ import utils
 ### Classes
 
 
-class GridFSDBM(MutableMapping):
+class MongoDBM(MutableMapping):
     """
 
     """
@@ -54,7 +54,8 @@ class GridFSDBM(MutableMapping):
         else:
             raise ValueError("Invalid flag")
 
-        utils.set_indexes(self._db, ttl)
+        if write:
+            utils.set_indexes(self._db, ttl)
 
         self._ttl = ttl
         self._write = write
@@ -118,11 +119,11 @@ class GridFSDBM(MutableMapping):
     def __len__(self):
         return self._db['fs.files'].estimated_document_count()
 
-    def __contains__(self, key):
+    def __contains__(self, key: str):
         fs = gridfs.GridFS(self._db)
         return fs.exists(filename=key)
 
-    def get(self, key, default=None):
+    def get(self, key: str, default=None):
         try:
             fs = gridfs.GridFSBucket(self._db)
             value = fs.open_download_stream_by_name(key)
@@ -130,7 +131,7 @@ class GridFSDBM(MutableMapping):
         except gridfs.errors.NoFile:
             return default
 
-    def update(self, key_value_dict, threads=30):
+    def update(self, key_value_dict: dict, threads: int=30):
         """
 
         """
@@ -147,9 +148,13 @@ class GridFSDBM(MutableMapping):
         else:
             raise ValueError('File is open for read only.')
 
-    def __getitem__(self, key):
-
-        return self.get(key)
+    def __getitem__(self, key: str):
+        try:
+            fs = gridfs.GridFSBucket(self._db)
+            value = fs.open_download_stream_by_name(key)
+            return value
+        except gridfs.errors.NoFile:
+            raise KeyError(key)
 
 
     def __setitem__(self, key: str, value: Union[bytes, io.IOBase]):
@@ -160,7 +165,7 @@ class GridFSDBM(MutableMapping):
         else:
             raise ValueError('File is open for read only.')
 
-    def __delitem__(self, key):
+    def __delitem__(self, key: str):
         if self._write:
             fs = gridfs.GridFS(self._db)
 
@@ -205,7 +210,7 @@ class GridFSDBM(MutableMapping):
 def open(
     host: str='localhost', port: int=27017, database: str='db', flag: str = 'r', ttl: int=None):
     """
-    Open a MongoDB connection for writing and/or reading in a python dictionary API style (MutableMapping). The MongoDB GridFS spec is used for storing objects. All keys must be strings and values must be either bytes or file-like objects.
+    Open a MongoDB connection for writing and/or reading in a python dbm API style (MutableMapping). The MongoDB GridFS spec is used for storing objects. All keys must be strings and values must be either bytes or file-like objects.
 
     Parameters
     -----------
@@ -222,11 +227,11 @@ def open(
         Flag associated with how the database is opened according to the dbm style. See below for details.
 
     ttl : int or None
-        Give the database a Time To Live (ttl) lifetime in seconds. All objects will persist in the database for this length. The default None will not assign a ttl.
+        Give the database a Time To Live (ttl) lifetime in seconds. All objects will persist in the database for this length. The default None will not assign a ttl. The ttl will only be changed in the collections if the flag parameter is set to anything but "r". Be careful to be consistant with the ttl as it will get overwritten if it is set to something different than the time before.
 
     Returns
     -------
-    GridFSDBM
+    MongoDBM
 
     The optional *flag* argument can be:
 
@@ -247,4 +252,4 @@ def open(
     +---------+-------------------------------------------+
     """
 
-    return GridFSDBM(host, port, database, flag, ttl)
+    return MongoDBM(host, port, database, flag, ttl)

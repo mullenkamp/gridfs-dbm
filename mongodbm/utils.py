@@ -22,6 +22,8 @@ files_coll = 'fs.files'
 files_index1 = [('filename', 1), ('uploadDate', 1)]
 files_index2 = [('uploadDate', 1)]
 
+ttl_index_name = 'uploadDate_1'
+
 ############################################
 ### Functions
 
@@ -36,19 +38,32 @@ def drop_index(coll, index):
         pass
 
 
-def set_indexes(db, ttl=None):
+def set_indexes(db, ttl: int=None):
     """
 
     """
+    ## Base indexes required by GridFS
     db[chunks_coll].create_index(chunks_index1, unique=True)
-    drop_index(db[chunks_coll], chunks_index2)
-    if isinstance(ttl, int):
-        db[chunks_coll].create_index(chunks_index2, expireAfterSeconds=ttl)
-
     db[files_coll].create_index(files_index1)
-    drop_index(db[files_coll], files_index2)
+
+    ## Check and assign ttl indexes
+    index1 = db[files_coll].index_information()
+
     if isinstance(ttl, int):
-        db[files_coll].create_index(files_index2, expireAfterSeconds=ttl)
+        if ttl_index_name in index1:
+            old_ttl = index1[ttl_index_name]['expireAfterSeconds']
+            if old_ttl != ttl:
+                drop_index(db[chunks_coll], chunks_index2)
+                drop_index(db[files_coll], files_index2)
+                db[chunks_coll].create_index(chunks_index2, expireAfterSeconds=ttl)
+                db[files_coll].create_index(files_index2, expireAfterSeconds=ttl)
+        else:
+            db[chunks_coll].create_index(chunks_index2, expireAfterSeconds=ttl)
+            db[files_coll].create_index(files_index2, expireAfterSeconds=ttl)
+    else:
+        if ttl_index_name in index1:
+            drop_index(db[chunks_coll], chunks_index2)
+            drop_index(db[files_coll], files_index2)
 
 
 def set_item(db, key, value):
