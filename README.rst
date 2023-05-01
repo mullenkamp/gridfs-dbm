@@ -9,6 +9,8 @@ This package was primarily made to be a fast and persistent key/value store that
 
 A MongoDB server must be running and accessible for mongodbm to work.
 
+If someone is brave enough to try this out, take a look at the doc strings of the mongodbm.open function to find out what you need to do. It's pretty straightforward.
+
 Installation
 ------------
 Install via pip::
