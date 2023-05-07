@@ -55,6 +55,7 @@ class MongoDBM(MutableMapping):
 
         self._ttl = ttl
         self._write = write
+        self._chunk_size = gridfs.DEFAULT_CHUNK_SIZE
 
 
     def keys(self):

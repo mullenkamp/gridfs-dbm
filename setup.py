@@ -9,7 +9,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 # General parameters
 name = 'mongodbm'
 main_package = 'mongodbm'
-version = '0.0.2'
+version = '0.0.3'
 descrip = 'A python key-value MongoDB database'
 
 # The below code is for readthedocs. To have sphinx/readthedocs interact with
